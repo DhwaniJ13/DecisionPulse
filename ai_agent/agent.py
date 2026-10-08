@@ -15,17 +15,18 @@ from .tools import (
 
 load_dotenv()
 
-api_key = os.getenv("GEMINI_API_KEY")
 
-if not api_key:
-    raise RuntimeError(
-        "GEMINI_API_KEY is not set in .env"
-    )
-
-client = genai.Client(api_key=api_key)
+def get_client() -> genai.Client:
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise RuntimeError(
+            "GEMINI_API_KEY is not set in .env"
+        )
+    return genai.Client(api_key=api_key)
 
 
 def investigate(context: dict) -> InvestigationResult:
+    client = get_client()
 
     evidence_result = analyze_evidence_change(
         context["changed_evidence"]

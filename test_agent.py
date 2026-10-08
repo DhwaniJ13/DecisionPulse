@@ -43,12 +43,11 @@ related_evidence = [
 ]
 
 
-result = investigate_decision(
-    decision=decision,
-    changed_evidence=changed_evidence,
-    dependency=dependency,
-    related_evidence=related_evidence,
-)
-
-
-print(result.model_dump_json(indent=2))
+if __name__ == "__main__":
+    result = investigate_decision(
+        decision=decision,
+        changed_evidence=changed_evidence,
+        dependency=dependency,
+        related_evidence=related_evidence,
+    )
+    print(result.model_dump_json(indent=2))
