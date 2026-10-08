@@ -15,7 +15,7 @@ def seed(db: Session):
     now = utcnow()
     E = lambda *a, **k: Evidence(*a, **k)
     ev = [
-        E(id=1, name="Acme ISO 27001 Certificate", evidence_type="CERTIFICATE", entity_name="Acme Corp", expires_at=now + timedelta(days=2)),
+        E(id=1, name="Acme ISO 27001 Certificate", evidence_type="CERTIFICATE", entity_name="Acme Corp", status="VALID", expires_at=now + timedelta(days=2)),
         E(id=2, name="Acme SOC 2 Type II Report", evidence_type="DOCUMENT", entity_name="Acme Corp", expires_at=now + timedelta(days=200)),
         E(id=3, name="Acme Vendor Risk Score", evidence_type="RISK_SCORE", entity_name="Acme Corp", value=32.0),
         E(id=4, name="Acme Financial Health Report", evidence_type="FINANCIAL", entity_name="Acme Corp"),
