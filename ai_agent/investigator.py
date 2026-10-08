@@ -1,5 +1,8 @@
 from .agent import investigate
-from .risk_engine import calculate_risk_signals
+try:
+    from .risk_engine import calculate_risk_signals
+except ImportError:
+    from risk_engine import calculate_risk_signals
 
 
 def investigate_decision(

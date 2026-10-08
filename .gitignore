@@ -50,6 +50,12 @@ coverage.xml
 .pytest_cache/
 cover/
 
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite3-journal
+
 # Environments & Virtual Environments
 .env
 .env.local

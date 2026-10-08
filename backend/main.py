@@ -1,4 +1,14 @@
 import logging
+import sys
+from pathlib import Path
+
+# Ensure backend directory and workspace root are in sys.path
+BACKEND_DIR = Path(__file__).resolve().parent
+ROOT_DIR = BACKEND_DIR.parent
+for p in [str(BACKEND_DIR), str(ROOT_DIR)]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
+
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -86,27 +96,28 @@ def update_evidence(payload: EvidenceUpdateRequest):
             new_status=payload.new_status,
         )
     except Exception as exc:
-        logger.error("Error during Impact Analysis: %s", exc)
+        logger.error("Error during Impact Analysis: %s", exc, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Impact analysis failed while evaluating affected decisions.",
+            detail=f"Impact analysis failed: {str(exc)}",
         )
 
     # Step 2: Mem2 AI Revalidation Connector
     try:
         ai_data = run_ai_investigation(impact_data)
     except Exception as exc:
-        logger.error("Error during AI Investigation: %s", exc)
+        logger.error("Error during AI Investigation: %s", exc, exc_info=True)
+        detail_msg = str(exc) if "GEMINI_API_KEY" in str(exc) else "AI investigation failed while evaluating risk and recommendations."
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="AI investigation failed while evaluating risk and recommendations.",
+            detail=detail_msg,
         )
 
     # Step 3: Backend Automation Action Service
     try:
         action_data = determine_action(ai_data)
     except Exception as exc:
-        logger.error("Error during Action Determination: %s", exc)
+        logger.error("Error during Action Determination: %s", exc, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Action determination failed while processing policy rules.",
@@ -118,7 +129,12 @@ def update_evidence(payload: EvidenceUpdateRequest):
             evidence_id=payload.evidence_id,
             new_status=payload.new_status,
         ),
-        impact=ImpactResult(**impact_data),
+        impact=ImpactResult(
+            evidence_id=impact_data["evidence_id"],
+            status=impact_data["status"],
+            affected_decisions=impact_data["affected_decisions"],
+            affected_count=impact_data["affected_count"],
+        ),
         ai=AIResult(**ai_data),
         action=ActionResult(**action_data),
     )
